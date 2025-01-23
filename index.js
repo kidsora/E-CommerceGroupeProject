@@ -18,6 +18,8 @@ app.use(express.static("public"));
 
 const userRoute = require("./routes/userRoute");
 const routerOrder = require("./routes/routesCommandes");
+const productRoutes = require('./routes/product');
+app.use('/api/product', productRoutes)
 app.use("/user", userRoute);
 app.use("/orders", routerOrder);
 
