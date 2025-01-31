@@ -1,33 +1,29 @@
-const http = require("http");
 const mongoose = require("mongoose");
-
+const express = require("express");
 require("dotenv").config();
+
 mongoose
-  .connect(
-    "mongodb+srv://useContact:test1@cluster2.ogcau.mongodb.net/?retryWrites=true&w=majority&appName=Cluster2"
-  )
+  .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("Connected to MongoDB"))
   .catch((error) => console.error("MongoDB connection error:", error.message));
 
-const express = require("express");
 const app = express();
 app.use(express.json());
-app.set("view engine", "ejs");
-app.set("views", "./views/users");
-app.use(express.static("public"));
+app.use(express.static("public")); 
 
 const userRoute = require("./routes/userRoute");
 const routerOrder = require("./routes/routesCommandes");
-const productRoutes = require('./routes/product');
-app.use('/api/product', productRoutes)
+const productRoutes = require("./routes/product");
+
+app.use("/product", productRoutes);
 app.use("/user", userRoute);
 app.use("/orders", routerOrder);
 
-app.get("/register", (req, res) => {
-  res.render("registration/registration");
+app.get("/", (req, res) => {
+  res.json({ message: "Welcome to the API!" });
 });
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log("Server is running...");
+  console.log(`Server is running on port ${PORT}...`);
 });

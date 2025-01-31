@@ -1,34 +1,48 @@
 const express = require("express");
-const user_route = express();
+const user_route = express.Router();
+const userController = require("../controllers/userController");
+const multer = require("multer");
+const { authenticate } = require("../controllers/userController");
 
-
-const userController = require("../controllers/userController")
-
-const bodyParser = require("body-parser")
-user_route.use(bodyParser.json())
-user_route.use(bodyParser.urlencoded({extended:true}))
-
-const multer = require("multer")
-const path = require("path")
 const storage = multer.diskStorage({
-    destination:function(req,file,cb){
-        cb(null, path.join(__dirname, "../public/userImages"));
-    },
-    filename:function(req,file,cb){
-        const name = Date.now()+'-'+file.originalname;
-        cb(null,name)
-    }
-})
-const upload = multer({storage:storage})
+  destination: (req, file, cb) => {
+    cb(null, "public/userImages");
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+const upload = multer({ storage: storage });
 
+user_route.use(express.json());
+user_route.use(express.urlencoded({ extended: true }));
 
-user_route.get("/register", userController.loadRegister)
-
-user_route.post("/register" ,upload.single("image"),userController.insertUser)
+user_route.post("/register", upload.single("image"), userController.insertUser);
 
 user_route.get("/verify", userController.verifyMail);
 
-user_route.post("/login",userController.loginUser);
+user_route.post("/login", userController.loginUser);
 
+user_route.get("/dashboard", authenticate, (req, res) => {
+  res.json({ message: "Welcome to the dashboard!", user: req.user });
+});
 
-module.exports = user_route
+user_route.post("/logout", userController.logoutUser);
+
+user_route.post("/forgot-password", userController.forgotPassword);
+
+user_route.post("/reset-password", userController.resetPassword);
+
+user_route.get("/profile", authenticate, userController.getUserProfile);
+
+user_route.put("/profile", authenticate, upload.single("image"), userController.updateUserProfile);
+
+user_route.post("/enable-2fa", authenticate, userController.enable2FA);
+
+user_route.post("/verify-2fa", authenticate, userController.verify2FA);
+
+user_route.get("/admin/users", authenticate, userController.getAllUsers);
+
+user_route.delete("/admin/users/:id", authenticate, userController.deleteUser);
+
+module.exports = user_route;
