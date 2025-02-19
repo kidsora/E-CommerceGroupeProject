@@ -14,10 +14,12 @@ app.use(express.static("public"));
 const userRoute = require("./routes/userRoute");
 const routerOrder = require("./routes/routesCommandes");
 const productRoutes = require("./routes/product");
+const deliveryRoutes= require("./routes/deliveryRoutes")
 
 app.use("/product", productRoutes);
 app.use("/user", userRoute);
 app.use("/orders", routerOrder);
+app.use("/delivery",deliveryRoutes)
 
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to the API!" });
